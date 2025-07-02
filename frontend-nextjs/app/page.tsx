@@ -6,9 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Github } from "lucide-react";
 import { Fira_Code } from "next/font/google";
 import axios from "axios";
-
 const firaCode = Fira_Code({ subsets: ["latin"] });
-
 export default function Home() {
   const [repoURL, setURL] = useState<string>("");
   const [projectName, setProjectName] = useState<string>("");
@@ -17,21 +15,17 @@ export default function Home() {
   const [projectId, setProjectId] = useState<string | undefined>();
   const [deployPreviewURL, setDeployPreviewURL] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
-
   const logContainerRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
-
   const isValidURL: [boolean, string | null] = useMemo(() => {
     if (!repoURL.trim()) return [false, null];
     const regex = /^(?:https?:\/\/)?(?:www\.)?github\.com\/([^\/]+)\/([^\/]+)(?:\/)?$/;
     if (!regex.test(repoURL)) return [false, "Enter a valid Github Repository URL"];
     return [true, null];
   }, [repoURL]);
-
   // Initialize socket once
   useEffect(() => {
     socketRef.current = io("http://localhost:9002");
-
     socketRef.current.on("message", (message: string) => {
       try {
         const { log } = JSON.parse(message);
@@ -46,29 +40,24 @@ export default function Home() {
         // Ignore bad message formats
       }
     });
-
     return () => {
       socketRef.current?.disconnect();
     };
   }, []);
-
   const handleClickDeploy = useCallback(async () => {
     setLoading(true);
     setError(null);
-
     try {
       const { data } = await axios.post(`http://localhost:9000/project`, {
         name: projectName.trim(),
         gitURL: repoURL.trim(),
       });
-
       if (data?.status === "success" && data.data?.project) {
         const projectSlug = data.data.project.subDomain || data.data.project.id;
         setProjectId(projectSlug);
         // You need to define how to generate preview URL from projectSlug
         const previewURL = `https://${projectSlug}.yourdomain.com`; // adjust accordingly
         setDeployPreviewURL(previewURL);
-
         console.log(`Subscribing to logs: ${projectSlug}`);
         socketRef.current?.emit("subscribe", `logs:${projectSlug}`);
       } else {
@@ -80,7 +69,6 @@ export default function Home() {
       setLoading(false);
     }
   }, [repoURL, projectName]);
-
   return (
     <main className="flex justify-center items-center h-[100vh]">
       <div className="w-[600px] space-y-4">
@@ -100,9 +88,7 @@ export default function Home() {
             disabled={loading}
           />
         </span>
-
         {error && <p className="text-red-500">{error}</p>}
-
         <Button
           onClick={handleClickDeploy}
           disabled={!isValidURL[0] || !projectName.trim() || loading}
@@ -110,7 +96,6 @@ export default function Home() {
         >
           {loading ? "In Progress..." : "Deploy"}
         </Button>
-
         {deployPreviewURL && (
           <div className="mt-2 bg-slate-900 py-4 px-2 rounded-lg">
             <p>
@@ -126,7 +111,6 @@ export default function Home() {
             </p>
           </div>
         )}
-
         {logs.length > 0 && (
           <div
             className={`${firaCode.className} text-sm text-green-500 logs-container mt-5 border-green-500 border-2 rounded-lg p-4 h-[300px] overflow-y-auto`}
