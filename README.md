@@ -19,3 +19,4 @@ At this point following services would be up and running:
 [Watch The Demo Video](https://imgur.com/I6KgmNR)
 ### Architecture
 ![Vercel Clone Architecture](https://i.imgur.com/r7QUXqZ.png)
+
